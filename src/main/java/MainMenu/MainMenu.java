@@ -59,10 +59,11 @@ public class MainMenu {
 		try {
 			cusDaoImpl.createCustomer(last, first, username, password, account1);
 			System.out.println("Account Created! \nWelcome! Please try logging in again with the username and password");
-			startMenu();
 		} catch (SQLException e) {
 			System.out.println("Could not create Account and add to database\nPlease try again later");
-			e.printStackTrace();
+			System.out.println("Username already exists");
+		} finally {
+			startMenu();
 		}
 	}
 	
@@ -159,7 +160,9 @@ public class MainMenu {
 					System.out.println("Deposit could not be completed.");
 					e.printStackTrace();
 				}
-				customerScreen(c);
+				finally {
+					customerScreen(c);
+				}
 				break;
 			case 2:
 				System.out.println("WITHDRAW SCREEN");
@@ -171,8 +174,9 @@ public class MainMenu {
 				} catch (SQLException e) {
 					System.out.println("Withdraw could not be completed.");
 					e.printStackTrace();
+				} finally {
+					customerScreen(c);
 				}
-				customerScreen(c);
 				break;
 			case 3:
 				System.out.println("APPLY ACCOUNT SCREEN");
@@ -184,8 +188,9 @@ public class MainMenu {
 				} catch (SQLException e1) {
 					System.out.println("Could not complete application for opening new account.");
 					e1.printStackTrace();
+				} finally {
+					customerScreen(c);
 				}
-				customerScreen(c);
 				break;
 			case 4:
 				System.out.println("DELETE ACCOUNT SCREEN");
@@ -194,8 +199,9 @@ public class MainMenu {
 				} catch (SQLException e) {
 					System.out.println("Requested action could not be completed.");
 					e.printStackTrace();
+				} finally {
+					customerScreen(c);
 				}
-				customerScreen(c);
 				break;
 			default:
 				System.out.println("Please Select one of the Options Please");
@@ -230,8 +236,9 @@ public class MainMenu {
 					System.out.println();
 				} catch (SQLException e) {
 					e.printStackTrace();
+				} finally {
+					adminScreen(c);
 				}
-				adminScreen(c);
 				break;
 			case 2:
 				System.out.println("VIEWING ALL Users");
@@ -239,11 +246,13 @@ public class MainMenu {
 					List<Customer> cList = c.viewAllCustomers();
 					for(Customer cust : cList) {
 						System.out.println(cust.toString());
+						System.out.println();
 					}
 				} catch (SQLException e1) {
 					e1.printStackTrace();
+				} finally {
+					adminScreen(c);
 				}
-				adminScreen(c);
 				break;
 			
 			case 3:
@@ -273,8 +282,9 @@ public class MainMenu {
 				} catch (SQLException e) {
 					System.out.println("Something went wrong to delete user(s)");
 					e.printStackTrace();
+				} finally {
+					adminScreen(c);
 				}
-				adminScreen(c);
 				break;
 			default:
 				System.out.println("Please Select one of the Options Please");
@@ -300,6 +310,9 @@ public class MainMenu {
 		} catch (SQLException e) {
 			System.out.println("Could not create Account and add to database\nPlease try again later");
 			e.printStackTrace();
+		} finally {
+			System.out.println("Going back to Admin Screen");
+			System.out.println();
 		}
 	}
 		

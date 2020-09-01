@@ -158,8 +158,9 @@ public class AdminDaoImpl implements AdminDao {
 			} catch (SQLException e) {
 				System.out.println("Deposit could not be completed.");
 				e.printStackTrace();
+			} finally {
+				updateCustomerTransactions(c,scan);
 			}
-			updateCustomerTransactions(c,scan);
 			break;
 		case 2:
 			System.out.println("WITHDRAW SCREEN");
@@ -171,8 +172,9 @@ public class AdminDaoImpl implements AdminDao {
 			} catch (SQLException e) {
 				System.out.println("Withdraw could not be completed.");
 				e.printStackTrace();
+			} finally {
+				updateCustomerTransactions(c,scan);
 			}
-			updateCustomerTransactions(c,scan);
 			break;
 		case 3:
 			System.out.println("APPLY ACCOUNT SCREEN");
@@ -184,8 +186,9 @@ public class AdminDaoImpl implements AdminDao {
 			} catch (SQLException e1) {
 				System.out.println("Could not complete application for opening new account.");
 				e1.printStackTrace();
+			} finally {
+				updateCustomerTransactions(c,scan);
 			}
-			updateCustomerTransactions(c,scan);
 			break;
 		case 4:
 			System.out.println("DELETE ACCOUNT SCREEN");
@@ -194,12 +197,14 @@ public class AdminDaoImpl implements AdminDao {
 			} catch (SQLException e) {
 				System.out.println("Requested action could not be completed.");
 				e.printStackTrace();
-			}
+			} finally {
 			updateCustomerTransactions(c,scan);
+			}
 			break;
 		default:
 			System.out.println("Please Select one of the Options Please");
 			updateCustomerTransactions(c,scan);
+			break;
 		}
 	}
 	
@@ -230,6 +235,9 @@ public class AdminDaoImpl implements AdminDao {
 			break;
 		case 3:
 			System.out.println("Admin changed their mind, will not delete any user");
+			break;
+		default:
+			System.out.println("Please select one of the options.");
 			break;
 		}
 
