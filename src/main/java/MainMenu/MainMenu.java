@@ -4,6 +4,10 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Scanner;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
+
 import DaoImpl.AdminDaoImpl;
 import DaoImpl.CustomerDaoImpl;
 import beans.Admin;
@@ -13,10 +17,13 @@ import beans.Customer;
 public class MainMenu {
 	// Will contain most of the menu pages in this class... for BankAdmin and the Customers
 	
+	static Logger log = LogManager.getLogger(MainMenu.class);
 	
 	static Scanner scan = new Scanner(System.in);
 	
 	public static void startMenu() {
+		Configurator.initialize(null, "log4j.xml");
+		
 		
 		System.out.println("Welcome to the Banking App");
 		System.out.println("Before logging in, are you:");
@@ -28,13 +35,19 @@ public class MainMenu {
 			System.out.println("Exiting Application\nSee you soon!");
 			break;
 		case 1: // Customer Option
+			log.info("Entering customer login");
 			customerLogin();
+			log.info("Exiting customer login");
 			break;
 		case 2: // Admin Option
+			log.info("Entering admin login");
 			adminLogin();
+			log.info("Exiting admin login");
 			break;
 		case 3: // Create an Account Here
+			log.info("Entering create customer screen");
 			createCustomer();
+			log.info("Exiting create customer screen");
 			break;
 		default:
 			System.out.println("Please choose Customer or Administrator or exit app.");
@@ -59,9 +72,11 @@ public class MainMenu {
 		try {
 			cusDaoImpl.createCustomer(last, first, username, password, account1);
 			System.out.println("Account Created! \nWelcome! Please try logging in again with the username and password");
+			log.info("New Customer created");
 		} catch (SQLException e) {
 			System.out.println("Could not create Account and add to database\nPlease try again later");
 			System.out.println("Username already exists");
+			log.error("Username already exisits, must choose another UNIQUE username");
 		} finally {
 			startMenu();
 		}
@@ -80,19 +95,27 @@ public class MainMenu {
 				System.out.println("Enter your password\nIf you want to quit login write 'quit'");
 				String password = scan.next();
 				if(actualpassword.equals(password)) {
+					log.info("Successfully logged User " + c.getUserName());
 					customerScreen(c);
+					log.info("Exiting Customer Screen");
 				} else if(password.equals("quit")) {
+					log.info("User going back to Main Menu");
 					startMenu();
 				} else {
 					System.out.println("Incorrect Password");
+					log.warn("User input the wrong password: " + c.getUserName());
 					customerLogin();
 				}
 			} catch (SQLException e) {
+				log.error("Username is not in database");
 				System.out.println("User not found.");
 				e.printStackTrace();
+				startMenu();
 			} catch (NullPointerException e) {
+				log.error("Username does not exist");
 				System.out.println("User does not exist.");
 				e.printStackTrace();
+				startMenu();
 			}
 	}
 	
@@ -106,17 +129,23 @@ public class MainMenu {
 			System.out.println("Enter your password\nIf you want to quit login write 'quit'");
 			String password = scan.next();
 			if(actualpassword.equals(password)) {
+				log.info("Successfully logged in Admin" + c.getUserName());
 				adminScreen(adminDaoImpl);
+				log.info("Exiting Admin Screen");
 			} else if(password.equals("quit")) {
+				log.info("User going back to Main Menu");
 				startMenu();
 			} else {
+				log.warn("User input the wrong password");
 				System.out.println("Incorrect Password");
 				adminLogin();
 			}
 		} catch (SQLException e) {
+			log.error("Username is not in database");
 			System.out.println("User not found.");
 			e.printStackTrace();
 		} catch (NullPointerException e) {
+			log.error("Username does not exist");
 			System.out.println("User does not exist.");
 			e.printStackTrace();
 		}
@@ -137,6 +166,7 @@ public class MainMenu {
 	
 	
 	public static void customerScreen(Customer c) {
+		log.info(c.getUserName() + " in the Customer Screen");
 		CustomerDaoImpl custImp = new CustomerDaoImpl();
 		System.out.println("Welcome to the Customer Screen");
 		System.out.println("Here is your information");
@@ -156,7 +186,9 @@ public class MainMenu {
 				try {
 					custImp.depositScreen(c,deposit,scan);
 					System.out.println("Deposit of $" + deposit + " completed");
+					log.info("A deposit transaction for " + c.getUserName() + " was completed");
 				} catch (SQLException e) {
+					log.error("Deposit could not be completed for " + c.getUserName());
 					System.out.println("Deposit could not be completed.");
 					e.printStackTrace();
 				}
@@ -171,32 +203,31 @@ public class MainMenu {
 				try {
 					custImp.withdrawScreen(c, withdraw,scan);
 					System.out.println("Withdraw of $" + withdraw + "completed.");
+					log.info("A withdraw transaction for " + c.getUserName() + " was completed");
 				} catch (SQLException e) {
 					System.out.println("Withdraw could not be completed.");
 					e.printStackTrace();
+					log.error("Withdraw could not be completed for " + c.getUserName());
 				} finally {
 					customerScreen(c);
 				}
 				break;
 			case 3:
 				System.out.println("APPLY ACCOUNT SCREEN");
-				try {
 					System.out.println("How much would you want to have in your new Account?");
 					float account2 = scan.nextFloat();					
 					custImp.applyAccount(c,account2);
 					System.out.println("Account created");
-				} catch (SQLException e1) {
-					System.out.println("Could not complete application for opening new account.");
-					e1.printStackTrace();
-				} finally {
+					log.info("Secondary Account created for " + c.getUserName());
 					customerScreen(c);
-				}
 				break;
 			case 4:
 				System.out.println("DELETE ACCOUNT SCREEN");
 				try {
 					custImp.deleteAccount(c,scan);
+					log.info("Account successfully deleted for " + c.getUserName());
 				} catch (SQLException e) {
+					log.error("Requested action could not be completed for " + c.getUserName());
 					System.out.println("Requested action could not be completed.");
 					e.printStackTrace();
 				} finally {
@@ -222,6 +253,7 @@ public class MainMenu {
 			int decision = scan.nextInt();
 			switch(decision) {
 			case 0: 
+				log.info("Going back to Main Menu");
 				System.out.println("Logging out\nExiting");
 				startMenu();
 				break;
@@ -231,10 +263,12 @@ public class MainMenu {
 				String username = scan.next();
 				try {
 					Customer view = c.viewCustomerUsingUserName(username);
+					log.info("Admin viewing User " + view.getUserName());
 					System.out.println();
 					System.out.println(view.toString());
 					System.out.println();
 				} catch (SQLException e) {
+					log.error("Failed to view customer");
 					e.printStackTrace();
 				} finally {
 					adminScreen(c);
@@ -248,16 +282,19 @@ public class MainMenu {
 						System.out.println(cust.toString());
 						System.out.println();
 					}
+					log.info("Successfully viewed all Users");
 				} catch (SQLException e1) {
+					log.error("Could not get list of Users from Database");
 					e1.printStackTrace();
 				} finally {
 					adminScreen(c);
 				}
 				break;
-			
 			case 3:
 				System.out.println("CREATE a User ACCOUNT SCREEN");
+				log.info("Entering the Admin Create Customer Screen");
 				createCustomerScreen();
+				log.info("Sucessfully created Customer login into Bank");
 				adminScreen(c);
 				break;
 			case 4:
@@ -266,25 +303,21 @@ public class MainMenu {
 				String user = scan.next();
 				try {
 					Customer update = c.viewCustomerUsingUserName(user);
+					log.info("Successfully viewed Customer/User's information");
 					c.updateCustomer(update, scan);
 					c.updateCustomerTransactions(update, scan);
-					
 				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-				
-				adminScreen(c);
-				break;
-			case 5:
-				System.out.println("DELETE ALL USERS SCREEN");
-				try {
-					c.deleteCustomer(scan);
-				} catch (SQLException e) {
-					System.out.println("Something went wrong to delete user(s)");
+					log.error("Could not update User's information in the database");
 					e.printStackTrace();
 				} finally {
 					adminScreen(c);
-				}
+				}	
+				break;
+			case 5:
+				System.out.println("DELETE ALL USERS/USER SCREEN");
+					log.info("Entering the delete Customer method");
+					c.deleteCustomer(scan);
+					adminScreen(c);
 				break;
 			default:
 				System.out.println("Please Select one of the Options Please");
@@ -307,8 +340,10 @@ public class MainMenu {
 		try {
 			imp.createCustomer(last, first, username, password, account1);
 			System.out.println("Account Created! \nWelcome! Please try logging in again with the username and password\nAfter the Bank Administrator logs out");
+			log.info("Successfully created account for " + username);
 		} catch (SQLException e) {
 			System.out.println("Could not create Account and add to database\nPlease try again later");
+			log.error("Could not create account and add to database");
 			e.printStackTrace();
 		} finally {
 			System.out.println("Going back to Admin Screen");

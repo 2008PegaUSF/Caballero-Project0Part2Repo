@@ -6,13 +6,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
+
 import Dao.CustomerDao;
+import MainMenu.MainMenu;
 import beans.Customer;
 import util.ConnFactory;
 
 public class CustomerDaoImpl implements CustomerDao {
 
 	public static ConnFactory cf= ConnFactory.getInstance();
+	static Logger log = LogManager.getLogger(CustomerDaoImpl.class);
 	
 	public Customer getCustomerUsingUserName(String username) throws SQLException {
 		Connection conn= cf.getConnection();
@@ -148,21 +154,28 @@ public class CustomerDaoImpl implements CustomerDao {
 		return newBalance;
 	}
 
-	public void applyAccount(Customer c, float accountBalance) throws SQLException {
+	public void applyAccount(Customer c, float accountBalance) {
+		Configurator.initialize(null, "log4j.xml");
 		Connection conn = cf.getConnection();
 		String user = c.getUserName();
 		float balance = c.getAccount2();
-		float balanceAccount1Check = c.getAccount1();
-		if( balance == 0.0) { // when account 1 was deleted and wants to reopen again
-			String sql = "update \"BankInformation\" set \"Account2\"=? where \"UserName\" = ?";
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setFloat(1, balance);
-			ps.setString(2, user);
-			ps.executeUpdate();		
-			c.setAccount2(accountBalance);
-		} else if (balance > 0.0 && balanceAccount1Check > 0.0) {
+		float balanceAccount1Check = c.getAccount1(); // when account 1 was deleted and wants to reopen again
+		if (balance > 0.0 && balanceAccount1Check > 0.0) {
 			System.out.println("Cannot open more than 2 Accounts");
 		}
+		String sql = "update \"BankInformation\" set \"Account2\"=? where \"UserName\" = ?";
+		PreparedStatement ps;
+		try {
+			ps = conn.prepareStatement(sql);
+			ps.setFloat(1, accountBalance);
+			ps.setString(2, user);
+			ps.executeUpdate();		
+			log.info("Sucessfully added Secondary Account");
+		} catch (SQLException e) {
+			log.error("Could not add Secondary Account");
+			e.printStackTrace();
+		}
+		c.setAccount2(accountBalance);
 	}
 
 	public void deleteAccount(Customer c, Scanner in) throws SQLException {

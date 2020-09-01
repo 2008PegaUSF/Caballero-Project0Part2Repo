@@ -9,13 +9,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
+
 import Dao.AdminDao;
+import Driver.Driver;
 import beans.Admin;
 import beans.Customer;
+
 import util.ConnFactory;
 
 public class AdminDaoImpl implements AdminDao {
 
+	static Logger log = LogManager.getLogger(AdminDaoImpl.class);
 	public static ConnFactory cf= ConnFactory.getInstance();
 	
 	public Admin getAdminfromUserName(String username) throws SQLException {
@@ -70,7 +77,8 @@ public class AdminDaoImpl implements AdminDao {
 	}
 	
 	// Update Username, password, First and Last Names, do traditional customer transactions(will be implemented in the main menu class)
-	public void updateCustomer(Customer c, Scanner scan) throws SQLException {
+	public void updateCustomer(Customer c, Scanner scan) {
+		Configurator.initialize(null, "log4j.xml");
 		Connection conn= cf.getConnection();
 		System.out.println("What changes apart of your account balances do you want to change?"
 				+ "\n(1) Change First Name\n(2) Change Last Name"
@@ -84,10 +92,18 @@ public class AdminDaoImpl implements AdminDao {
 			String fname = scan.next();
 			String username = c.getUserName();
 			String sql = "update \"BankInformation\" set \"FirstName\"=? where \"UserName\" = ?";
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, fname);
-			ps.setString(2, username);
-			ps.executeUpdate();	
+			PreparedStatement ps;
+			try {
+				ps = conn.prepareStatement(sql);
+				ps.setString(1, fname);
+				ps.setString(2, username);
+				ps.executeUpdate();	
+				log.info("Successfully updated first name of " + username);
+			} catch (SQLException e) {
+				log.error("Could not update first name of " + username);
+				e.printStackTrace();
+				updateCustomer(c,scan);
+			}
 			c.setFirstName(fname);
 			updateCustomer(c,scan);
 			break;
@@ -96,10 +112,19 @@ public class AdminDaoImpl implements AdminDao {
 			String lname = scan.next();
 			String usernamel = c.getUserName();
 			String sql2 = "update \"BankInformation\" set \"LastName\"=? where \"UserName\" = ?";
-			PreparedStatement psl = conn.prepareStatement(sql2);
-			psl.setString(1, lname);
-			psl.setString(2, usernamel);
-			psl.executeUpdate();	
+			PreparedStatement psl;
+			try {
+				psl = conn.prepareStatement(sql2);
+				psl.setString(1, lname);
+				psl.setString(2, usernamel);
+				psl.executeUpdate();					
+				log.info("Successfully updated last name of " + usernamel);
+			} catch (SQLException e) {
+				log.error("Could not update last name of " + usernamel);
+				e.printStackTrace();
+				updateCustomer(c,scan);
+			}
+
 			c.setLastName(lname);
 			updateCustomer(c,scan);
 			break;
@@ -108,10 +133,19 @@ public class AdminDaoImpl implements AdminDao {
 			String Uname = scan.next();
 			String usernameU = c.getUserName();
 			String sql3 = "update \"BankInformation\" set \"UserName\"=? where \"UserName\" = ?";
-			PreparedStatement psU = conn.prepareStatement(sql3);
-			psU.setString(1, Uname);
-			psU.setString(2, usernameU);
-			psU.executeUpdate();	
+			PreparedStatement psU;
+			try {
+				psU = conn.prepareStatement(sql3);
+				psU.setString(1, Uname);
+				psU.setString(2, usernameU);
+				psU.executeUpdate();
+				log.info("Successfully updated username name of " + usernameU + " to " + Uname);				
+			} catch (SQLException e) {
+				log.error("Could not update username of " + usernameU);
+				e.printStackTrace();
+				updateCustomer(c,scan);
+			}
+	
 			c.setUserName(Uname);
 			updateCustomer(c,scan);
 			break;
@@ -120,10 +154,19 @@ public class AdminDaoImpl implements AdminDao {
 			String pname = scan.next();
 			String usernamep = c.getUserName();
 			String sql4 = "update \"BankInformation\" set \"UserPassword\"=? where \"UserName\" = ?";
-			PreparedStatement psp = conn.prepareStatement(sql4);
-			psp.setString(1, pname);
-			psp.setString(2, usernamep);
-			psp.executeUpdate();	
+			PreparedStatement psp;
+			try {
+				psp = conn.prepareStatement(sql4);
+				psp.setString(1, pname);
+				psp.setString(2, usernamep);
+				psp.executeUpdate();					
+				log.info("Successfully updated password of " + usernamep);				
+				
+			} catch (SQLException e) {
+				log.error("Could not update password of " + usernamep);
+				e.printStackTrace();
+				updateCustomer(c,scan);
+			}
 			c.setPassword(pname);
 			updateCustomer(c,scan);
 			break;
@@ -137,6 +180,7 @@ public class AdminDaoImpl implements AdminDao {
 	
 	
 	public void updateCustomerTransactions(Customer c, Scanner scan) {
+		Configurator.initialize(null, "log4j.xml");
 		CustomerDaoImpl custImp = new CustomerDaoImpl();
 		System.out.println("Now onto the portion of the User's Transactions");
 		System.out.println();
@@ -155,8 +199,10 @@ public class AdminDaoImpl implements AdminDao {
 			try {
 				custImp.depositScreen(c,deposit,scan);
 				System.out.println("Deposit of $" + deposit + " completed");
+				log.info("Deposit completed for " + c.getUserName() + " through Admin");
 			} catch (SQLException e) {
 				System.out.println("Deposit could not be completed.");
+				log.error("Deposit could not be completed for " + c.getUserName());
 				e.printStackTrace();
 			} finally {
 				updateCustomerTransactions(c,scan);
@@ -169,8 +215,10 @@ public class AdminDaoImpl implements AdminDao {
 			try {
 				custImp.withdrawScreen(c, withdraw,scan);
 				System.out.println("Withdraw of $" + withdraw + "completed.");
+				log.info("Withdraw transaction completed for " + c.getUserName());
 			} catch (SQLException e) {
 				System.out.println("Withdraw could not be completed.");
+				log.error("Withdraw for " + c.getUserName() + " could not be completed");
 				e.printStackTrace();
 			} finally {
 				updateCustomerTransactions(c,scan);
@@ -178,27 +226,24 @@ public class AdminDaoImpl implements AdminDao {
 			break;
 		case 3:
 			System.out.println("APPLY ACCOUNT SCREEN");
-			try {
 				System.out.println("How much would you want to have in your new Account?");
 				float account2 = scan.nextFloat();					
 				custImp.applyAccount(c,account2);
-				System.out.println("Account created");
-			} catch (SQLException e1) {
-				System.out.println("Could not complete application for opening new account.");
-				e1.printStackTrace();
-			} finally {
 				updateCustomerTransactions(c,scan);
-			}
+			
 			break;
 		case 4:
 			System.out.println("DELETE ACCOUNT SCREEN");
 			try {
+				log.info("Entering deleteAccount method for User " + c.getUserName());
 				custImp.deleteAccount(c,scan);
+				log.info("Successfully deleted account for " + c.getUserName());
 			} catch (SQLException e) {
+				log.error("Deleted account for " + c.getUserName() + " could not be completed");
 				System.out.println("Requested action could not be completed.");
 				e.printStackTrace();
 			} finally {
-			updateCustomerTransactions(c,scan);
+				updateCustomerTransactions(c,scan);
 			}
 			break;
 		default:
@@ -209,7 +254,8 @@ public class AdminDaoImpl implements AdminDao {
 	}
 	
 
-	public void deleteCustomer(Scanner scan) throws SQLException  {
+	public void deleteCustomer(Scanner scan) {
+		Configurator.initialize(null, "log4j.xml");
 		Connection conn= cf.getConnection();
 		System.out.println("(1) Do you want to Delete a particular user? Or\n(2) Do you want to delete all users?\n(3) DO NOT DELETE ANYONE");
 		int decide = scan.nextInt();
@@ -218,17 +264,35 @@ public class AdminDaoImpl implements AdminDao {
 			System.out.println("Please give the username of the user you'd like to delete");
 			String userDelete = scan.next();
 			String sql = "delete from \"BankInformation\" where \"UserName\" = ?";
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, userDelete);
-			ps.executeUpdate();	
+			PreparedStatement ps;
+			try {
+				ps = conn.prepareStatement(sql);
+				ps.setString(1, userDelete);
+				ps.executeUpdate();				
+				log.info("Delete a User/Customer successful. User was " + userDelete);
+			} catch (SQLException e) {
+				log.error("User name could not be deleted, perhaps not in database");
+				e.printStackTrace();
+				break;
+			} 
+	
 			break;
 		case 2:
 			System.out.println("Are you SURE you want to delete all users? (Yes--> 1 / No--> 0)");
 			int decision = scan.nextInt();
 			if(decision == 1) {
 				String sql2 = "truncate \"BankInformation\" cascade";
-				PreparedStatement ps2 = conn.prepareStatement(sql2);
-				ps2.executeUpdate();	
+				PreparedStatement ps2;
+				try {
+					ps2 = conn.prepareStatement(sql2);
+					ps2.executeUpdate();		
+					log.info("Deleting all users from database successful");
+				} catch (SQLException e) {
+					log.error("Users could not be deleted, perhaps not in database");
+					e.printStackTrace();
+					break;
+				}
+	
 			} else {
 				System.out.println("Okay, no users will be deleted.");
 			}
