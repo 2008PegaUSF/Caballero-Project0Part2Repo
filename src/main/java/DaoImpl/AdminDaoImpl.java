@@ -307,5 +307,22 @@ public class AdminDaoImpl implements AdminDao {
 
 			
 	}
+	
+	public int testDeleteIndividualCustomer(Customer c) {
+		Connection conn= cf.getConnection();
+		System.out.println("Please give the username of the user you'd like to delete");
+		String userDelete = c.getUserName();
+		String sql = "delete from \"BankInformation\" where \"UserName\" = ?";
+		PreparedStatement ps;
+		try {
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, userDelete);
+			ps.executeUpdate();	
+			return 1;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return 0;
+		} 
+	}
 
 }
