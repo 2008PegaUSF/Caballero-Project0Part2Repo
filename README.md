@@ -32,8 +32,8 @@ Password: password
 		- Deposit
 		- Withdraw
 		- Apply for a new Banking Account
-		- Delete a Banking Account * as long as it's empty *
-3. Create a new User login * if they need help creating one *
+		- Delete a Banking Account *as long as it's empty*
+3. Create a new User login *if they need help creating one*
 4. Delete User **and their information** Completely from the Banking App
 5. Delete ALL Users **and their information** from the Banking App
 
