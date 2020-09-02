@@ -268,7 +268,8 @@ public class AdminDaoImpl implements AdminDao {
 			try {
 				ps = conn.prepareStatement(sql);
 				ps.setString(1, userDelete);
-				ps.executeUpdate();				
+				ps.executeUpdate();			
+				System.out.println("User deleted, will need to create a new login if they want to use this app");
 				log.info("Delete a User/Customer successful. User was " + userDelete);
 			} catch (SQLException e) {
 				log.error("User name could not be deleted, perhaps not in database");
@@ -286,6 +287,7 @@ public class AdminDaoImpl implements AdminDao {
 				try {
 					ps2 = conn.prepareStatement(sql2);
 					ps2.executeUpdate();		
+					System.out.println("All Users deleted, go get some more!");
 					log.info("Deleting all users from database successful");
 				} catch (SQLException e) {
 					log.error("Users could not be deleted, perhaps not in database");

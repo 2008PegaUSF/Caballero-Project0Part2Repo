@@ -170,6 +170,7 @@ public class CustomerDaoImpl implements CustomerDao {
 			ps.setFloat(1, accountBalance);
 			ps.setString(2, user);
 			ps.executeUpdate();		
+			System.out.println("Account created");
 			log.info("Sucessfully added Secondary Account");
 		} catch (SQLException e) {
 			log.error("Could not add Secondary Account");
