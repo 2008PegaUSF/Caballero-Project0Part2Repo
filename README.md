@@ -37,5 +37,53 @@ Password: password
 4. Delete User **and their information** Completely from the Banking App
 5. Delete ALL Users **and their information** from the Banking App
 
+# Structure of the Project
+1. Driver.java
+	- Will prompt the Banking App to Launch, all you need to do is run this file
+2. MainMenu.java
+	- Contains the methods that contain the User Interface the User and Administrator will see when using the Banking App
+	- Includes Methods
+		- StartMenu()
+		- CreateCustomer() *specific to Customer creating their own account*
+		- customerLogin()
+		- customerScreen()
+		- adminLogin()
+		- adminScreen()
+		- createCustomerScreen() *specific to Admin creating the Customer(User) login for themselves*
+3. CustomerDaoImpl.java
+	- Implements interface of CustomerDao.java
+		- getCustomerUsingUserName()
+		- createCustomer() 
+		- depositScreen()
+			- depositFunc() *to compute the mathematical component of the transactions*
+		- withdrawScreen()
+			- withdrawFunc() *to compute the mathematical component of the transactions*
+		- applyAccount() *adds Seconding Banking Account*
+		- deleteAccount() *deletes Banking Account NOT login account*
+4. AdminDaoImpl.java
+	- Implements interface of AdminDao.java
+		- getAdminfromUserName()
+		- createCustomer()
+		- viewCustomerUsingUserName()
+		- viewAllCustomers()
+		- updateCustomer()
+		- updateCustomerTransactions()
+		- deleteCustomer()
+5. Beans
+	- Customer.java
+		- Contains the essential information that a User needs to have in their account with the Banking
+			- Name
+			- Login
+			- Password
+			- Financial Account Information
+	- Admin.java
+		- Contains the essential information that the Administrator needs in order to log in as Admin
+			- Name
+			- Login
+			- Password
+6. ConnFactory.java
+	- The .java file that allows the app to connect to the database that stores the information of the Users and the Adminstrator
+
+
 Now go download this Repository and HAVE AT IT!
 
