@@ -1,4 +1,4 @@
-# Project 0 Part 2: **JDBC Banking App**
+# Project 0 Part 2: JDBC Banking App
 
 ## Description:
 Welcome to the Banking App! Install the app into your IDLE and run the app through the console
@@ -21,7 +21,7 @@ Password: password
 5. The ability to do all this for as long as they like **AFTER** logging in.
 	- And logging out when they are done
 
-**As Administrator, you will have **
+**As Administrator, you will have**
 1. Access User's information *with special care*
 2. Update User's Account and Login Information
 	- Change the User's
